@@ -20,24 +20,24 @@
 #endif
 
 struct thread_start {
-    int **matriz1, **matriz2, **result;
-    int inicio;
-    int fim;
+    int **matrix1, **matrix2, **result;
+    int start;
+    int end;
     int n;
 };
 
 void *multi(void *x) {
-    struct thread_start *vars = (struct thread_start*)x;
+    struct thread_start *input = (struct thread_start*)x;
 
-    for (int i = vars->inicio; i < vars->fim; i++) {
-        for (int j = 0; j < vars->n; j++) {
-            for (int k = 0; k < vars->n; k++) {
-                vars->result[i][j] += vars->matriz1[i][k] * vars->matriz2[k][j];
+    for (int i = input->start; i < input->end; i++) {
+        for (int j = 0; j < input->n; j++) {
+            for (int k = 0; k < input->n; k++) {
+                input->result[i][j] += input->matrix1[i][k] * input->matrix2[k][j];
             }
         }
     }
 
-    free(vars);
+    free(input);
     return NULL;
 }
 
@@ -46,23 +46,23 @@ int main(int argc, char const *argv[]) {
     srand(2);
     int n = atoi(argv[1]);
 
-    int **matriz1 = (int **)calloc(n, sizeof(int*));
-    int **matriz2 = (int **)calloc(n, sizeof(int*));
+    int **matrix1 = (int **)calloc(n, sizeof(int*));
+    int **matrix2 = (int **)calloc(n, sizeof(int*));
 
     int **result = (int **)calloc(n, sizeof(int*));
 
     #ifdef DEBUG
-    printf("Matriz1:\n");
+    printf("Matrix1:\n");
     #endif
     for (int i = 0; i < n; i++) {
-        matriz1[i] = (int *)calloc(n, sizeof(int));
-        matriz2[i] = (int *)calloc(n, sizeof(int));
+        matrix1[i] = (int *)calloc(n, sizeof(int));
+        matrix2[i] = (int *)calloc(n, sizeof(int));
         result[i] = (int *)calloc(n, sizeof(int));
         for (int j = 0; j < n; j++) {
-            matriz1[i][j] = (rand() % (MAX + 1 - MIN)) + MIN;
-            matriz2[i][j] = (rand() % (MAX + 1 - MIN)) + MIN;
+            matrix1[i][j] = (rand() % (MAX + 1 - MIN)) + MIN;
+            matrix2[i][j] = (rand() % (MAX + 1 - MIN)) + MIN;
             #ifdef DEBUG
-            printf("%4d", matriz1[i][j]);
+            printf("%4d", matrix1[i][j]);
             #endif
         }
         #ifdef DEBUG
@@ -72,10 +72,10 @@ int main(int argc, char const *argv[]) {
     #ifdef DEBUG
     printf("\n");
 
-    printf("Matriz2:\n");
+    printf("Matrix2:\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            printf("%4d", matriz2[i][j]);
+            printf("%4d", matrix2[i][j]);
         }
         printf("\n");
     }
@@ -87,20 +87,20 @@ int main(int argc, char const *argv[]) {
     pthread_t *vet_thread = (pthread_t *)calloc(N_THREAD, sizeof(pthread_t));
     #endif
 
-    struct thread_start *vars = NULL;
+    struct thread_start *input = NULL;
 
     for (int i = 0; i < N_THREAD; i++) {
-        vars = (struct thread_start*)calloc(1, sizeof(struct thread_start));
-        vars->matriz1 = matriz1;
-        vars->matriz2 = matriz2;
-        vars->result = result;
-        vars->inicio = (i*n)/N_THREAD;
-        vars->fim = ((i+1)*n)/N_THREAD;
-        vars->n = n;
+        input = (struct thread_start*)calloc(1, sizeof(struct thread_start));
+        input->matrix1 = matrix1;
+        input->matrix2 = matrix2;
+        input->result = result;
+        input->start = (i*n)/N_THREAD;
+        input->end = ((i+1)*n)/N_THREAD;
+        input->n = n;
         #ifdef SEQ
         multi(vars);
         #else
-        pthread_create(&vet_thread[i], NULL, multi, vars);
+        pthread_create(&vet_thread[i], NULL, multi, input);
         #endif
     }
 
@@ -112,7 +112,7 @@ int main(int argc, char const *argv[]) {
     #endif
 
     #ifdef DEBUG
-    printf("Resultado:\n");
+    printf("Result:\n");
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
