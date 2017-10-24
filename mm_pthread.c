@@ -55,9 +55,12 @@ int main(int argc, char const *argv[]) {
     printf("Matrix1:\n");
     #endif
     for (int i = 0; i < n; i++) {
+
+        /* Memory allocation and data initialization for DEBUG */
         matrix1[i] = (int *)calloc(n, sizeof(int));
         matrix2[i] = (int *)calloc(n, sizeof(int));
         result[i] = (int *)calloc(n, sizeof(int));
+
         for (int j = 0; j < n; j++) {
             matrix1[i][j] = (rand() % (MAX + 1 - MIN)) + MIN;
             matrix2[i][j] = (rand() % (MAX + 1 - MIN)) + MIN;
@@ -89,6 +92,7 @@ int main(int argc, char const *argv[]) {
 
     struct thread_start *input = NULL;
 
+    /* Launch N_THREADS threads */
     for (int i = 0; i < N_THREAD; i++) {
         input = (struct thread_start*)calloc(1, sizeof(struct thread_start));
         input->matrix1 = matrix1;
@@ -105,6 +109,7 @@ int main(int argc, char const *argv[]) {
     }
 
     #ifndef SEQ
+    /* Barrier for recover sequential execution */
     for (int i = 0; i < N_THREAD; i++) {
         pthread_join(vet_thread[i], NULL);
     }
